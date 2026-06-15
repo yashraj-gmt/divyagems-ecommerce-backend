@@ -41,32 +41,22 @@ public interface CategoryMapper {
 
     // ─── CategoryRequest → Entity (CREATE) ──────────────────
 
-    @Mapping(target = "id",         ignore = true)
-    @Mapping(target = "slug",       ignore = true)   // generated in service
-    @Mapping(target = "parent",     ignore = true)   // resolved in service
-    @Mapping(target = "children",   ignore = true)
-    @Mapping(target = "products",   ignore = true)
-    @Mapping(target = "createdAt",  ignore = true)
-    @Mapping(target = "updatedAt",  ignore = true)
-    @Mapping(target = "createdBy",  ignore = true)
-    @Mapping(target = "updatedBy",  ignore = true)
+    @Mapping(target = "slug",     ignore = true)   // generated in service
+    @Mapping(target = "parent",   ignore = true)   // resolved in service
+    @Mapping(target = "children", ignore = true)
+    @Mapping(target = "products", ignore = true)
     Category toEntity(CategoryRequest request);
 
-    // ─── CategoryRequest → Entity (UPDATE) ──────────────────
+    // CategoryRequest → Entity (UPDATE)
 
     /**
      * Applies non-null request fields onto an existing Category entity.
      * Null values in the request are ignored, preserving current entity state.
      */
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "id",         ignore = true)
-    @Mapping(target = "slug",       ignore = true)   // re-generated in service if name changed
-    @Mapping(target = "parent",     ignore = true)   // resolved in service
-    @Mapping(target = "children",   ignore = true)
-    @Mapping(target = "products",   ignore = true)
-    @Mapping(target = "createdAt",  ignore = true)
-    @Mapping(target = "updatedAt",  ignore = true)
-    @Mapping(target = "createdBy",  ignore = true)
-    @Mapping(target = "updatedBy",  ignore = true)
+    @Mapping(target = "slug",     ignore = true)   // re-generated in service if name changed
+    @Mapping(target = "parent",   ignore = true)   // resolved in service
+    @Mapping(target = "children", ignore = true)
+    @Mapping(target = "products", ignore = true)
     void updateFromRequest(CategoryRequest request, @MappingTarget Category category);
 }

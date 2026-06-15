@@ -61,4 +61,53 @@ public interface ProductRepository extends JpaRepository<Product, UUID>,
     @Modifying
     @Query("UPDATE Product p SET p.status = :status WHERE p.id IN :ids")
     int bulkUpdateStatus(@Param("ids") List<UUID> ids, @Param("status") ProductStatusEnum status);
+
+    // ─── Search / Suggestions ─────────────────────────────────
+
+    /**
+     * Autocomplete suggestions: top N active products matching keyword in name or SKU.
+     * Returns [id, name, slug, price, salePrice] projections — image URL resolved in service.
+     */
+    @Query("""
+            SELECT p FROM Product p
+            WHERE p.status = com.divyagems.ecommerce.enums.ProductStatusEnum.ACTIVE
+              AND (LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR LOWER(p.sku)  LIKE LOWER(CONCAT('%', :keyword, '%')))
+            ORDER BY p.averageRating DESC
+            """)
+    List<Product> findSuggestions(@Param("keyword") String keyword, Pageable pageable);
+
+    // ─── Filter Options ───────────────────────────────────────
+
+    /** Minimum effective price across all ACTIVE products. */
+    @Query("""
+            SELECT MIN(CASE WHEN p.salePrice IS NOT NULL AND p.salePrice > 0
+                            THEN p.salePrice ELSE p.price END)
+            FROM Product p
+            WHERE p.status = com.divyagems.ecommerce.enums.ProductStatusEnum.ACTIVE
+            """)
+    java.math.BigDecimal findMinActivePrice();
+
+    /** Maximum effective price across all ACTIVE products. */
+    @Query("""
+            SELECT MAX(CASE WHEN p.salePrice IS NOT NULL AND p.salePrice > 0
+                            THEN p.salePrice ELSE p.price END)
+            FROM Product p
+            WHERE p.status = com.divyagems.ecommerce.enums.ProductStatusEnum.ACTIVE
+            """)
+    java.math.BigDecimal findMaxActivePrice();
+
+    // ─── Dashboard Queries ─────────────────────────────────────
+
+    /** Products where stock is at or below their lowStockThreshold. */
+    @Query("""
+            SELECT p FROM Product p
+            WHERE p.stockQuantity <= p.lowStockThreshold
+              AND p.status = com.divyagems.ecommerce.enums.ProductStatusEnum.ACTIVE
+            ORDER BY p.stockQuantity ASC
+            """)
+    List<Product> findLowStockProducts();
+
+    /** Count products by a given status. */
+    long countByStatus(ProductStatusEnum status);
 }

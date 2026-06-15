@@ -24,23 +24,13 @@ public interface ProductMapper {
 
     // ─── Variant: Request → Entity ─────────────────────────────
 
-    @Mapping(target = "id",         ignore = true)
-    @Mapping(target = "product",    ignore = true)
+    @Mapping(target = "product",       ignore = true)
     @Mapping(target = "variantImages", ignore = true)
-    @Mapping(target = "createdAt",  ignore = true)
-    @Mapping(target = "updatedAt",  ignore = true)
-    @Mapping(target = "createdBy",  ignore = true)
-    @Mapping(target = "updatedBy",  ignore = true)
     ProductVariant toVariantEntity(ProductVariantRequest request);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "id",         ignore = true)
-    @Mapping(target = "product",    ignore = true)
+    @Mapping(target = "product",       ignore = true)
     @Mapping(target = "variantImages", ignore = true)
-    @Mapping(target = "createdAt",  ignore = true)
-    @Mapping(target = "updatedAt",  ignore = true)
-    @Mapping(target = "createdBy",  ignore = true)
-    @Mapping(target = "updatedBy",  ignore = true)
     void updateVariantFromRequest(ProductVariantRequest request, @MappingTarget ProductVariant variant);
 
     // ─── Variant: Entity → Response ───────────────────────────
@@ -52,12 +42,7 @@ public interface ProductMapper {
 
     // ─── Image: Request → Entity ───────────────────────────────
 
-    @Mapping(target = "id",        ignore = true)
-    @Mapping(target = "product",   ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "createdBy", ignore = true)
-    @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "product", ignore = true)
     ProductImage toImageEntity(ProductImageRequest request);
 
     List<ProductImage> toImageEntityList(List<ProductImageRequest> requests);

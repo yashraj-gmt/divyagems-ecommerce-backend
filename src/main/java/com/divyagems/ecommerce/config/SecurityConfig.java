@@ -54,6 +54,16 @@ public class SecurityConfig {
             "/products/**",
             "/categories/**",
             "/tags/**",
+            // Order tracking — public with phone verification
+            "/orders/*/track",
+            // Product reviews (public listing + summary)
+            "/products/*/reviews",
+            "/products/*/reviews/**",
+            // Search endpoints (all public)
+            "/search",
+            "/search/**",
+            // Uploaded static files (profile images, etc.)
+            "/uploads/**",
             // Swagger / OpenAPI
             "/swagger-ui/**",
             "/swagger-ui.html",
@@ -113,8 +123,7 @@ public class SecurityConfig {
 
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }

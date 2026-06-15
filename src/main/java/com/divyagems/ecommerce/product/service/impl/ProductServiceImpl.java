@@ -13,6 +13,7 @@ import com.divyagems.ecommerce.product.dto.response.*;
 import com.divyagems.ecommerce.product.mapper.ProductMapper;
 import com.divyagems.ecommerce.product.repository.ProductRepository;
 import com.divyagems.ecommerce.product.repository.ProductSpecification;
+import com.divyagems.ecommerce.product.repository.ProductVariantRepository;
 import com.divyagems.ecommerce.product.service.ProductService;
 import com.divyagems.ecommerce.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
@@ -40,10 +41,11 @@ public class ProductServiceImpl implements ProductService {
     private static final int RELATED_PRODUCTS_LIMIT = 8;
     private static final int NEW_ARRIVALS_LIMIT      = 12;
 
-    private final ProductRepository    productRepository;
-    private final CategoryRepository   categoryRepository;
-    private final TagRepository        tagRepository;
-    private final ProductMapper        productMapper;
+    private final ProductRepository      productRepository;
+    private final ProductVariantRepository variantRepository;
+    private final CategoryRepository      categoryRepository;
+    private final TagRepository           tagRepository;
+    private final ProductMapper           productMapper;
 
     // ─── Create ────────────────────────────────────────────────
 

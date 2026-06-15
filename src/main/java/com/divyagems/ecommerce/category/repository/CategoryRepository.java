@@ -43,6 +43,8 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
     @Query("SELECT COUNT(p.id) > 0 FROM Product p WHERE p.category.id = :categoryId OR p.subCategory.id = :categoryId")
     boolean hasProducts(@Param("categoryId") UUID categoryId);
 
+    Optional<Category> findByName(String name);
+
     /**
      * Check whether a category has any active children.
      */
