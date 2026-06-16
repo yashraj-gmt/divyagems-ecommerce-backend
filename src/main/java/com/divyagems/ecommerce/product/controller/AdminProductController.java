@@ -1,6 +1,6 @@
 package com.divyagems.ecommerce.product.controller;
 
-import com.divyagems.ecommerce.common.ApiResponse;
+import com.divyagems.ecommerce.common.StandardApiResponse;
 import com.divyagems.ecommerce.product.dto.request.BulkStatusRequest;
 import com.divyagems.ecommerce.product.dto.request.ProductFilterRequest;
 import com.divyagems.ecommerce.product.dto.request.ProductRequest;
@@ -52,11 +52,11 @@ public class AdminProductController {
                           "Supports the same filter params as the public listing " +
                           "but without defaulting to ACTIVE status."
     )
-    public ResponseEntity<ApiResponse<ProductPageResponse>> getAllProducts(
+    public ResponseEntity<StandardApiResponse<ProductPageResponse>> getAllProducts(
             @ModelAttribute ProductFilterRequest filter) {
 
         ProductPageResponse result = productService.getProducts(filter, true);
-        return ResponseEntity.ok(ApiResponse.success("Products fetched", result));
+        return ResponseEntity.ok(StandardApiResponse.success("Products fetched", result));
     }
 
     @PostMapping
@@ -67,12 +67,12 @@ public class AdminProductController {
                           "Slug is auto-generated from name if not provided. " +
                           "SKU must be globally unique."
     )
-    public ResponseEntity<ApiResponse<ProductResponse>> createProduct(
+    public ResponseEntity<StandardApiResponse<ProductResponse>> createProduct(
             @Valid @RequestBody ProductRequest request) {
 
         ProductResponse created = productService.createProduct(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Product created successfully", created));
+                .body(StandardApiResponse.success("Product created successfully", created));
     }
 
     @PutMapping("/{id}")
@@ -81,12 +81,12 @@ public class AdminProductController {
             description = "Full replacement update. Variants and images are replaced (not merged). " +
                           "Slug is regenerated if name changes and no explicit slug is provided."
     )
-    public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(
+    public ResponseEntity<StandardApiResponse<ProductResponse>> updateProduct(
             @PathVariable UUID id,
             @Valid @RequestBody ProductRequest request) {
 
         ProductResponse updated = productService.updateProduct(id, request);
-        return ResponseEntity.ok(ApiResponse.success("Product updated successfully", updated));
+        return ResponseEntity.ok(StandardApiResponse.success("Product updated successfully", updated));
     }
 
     @DeleteMapping("/{id}")
@@ -95,9 +95,9 @@ public class AdminProductController {
             description = "Sets the product status to INACTIVE. " +
                           "Hard deletion is not supported to preserve order history integrity."
     )
-    public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable UUID id) {
+    public ResponseEntity<StandardApiResponse<Void>> deleteProduct(@PathVariable UUID id) {
         productService.deleteProduct(id);
-        return ResponseEntity.ok(ApiResponse.success("Product deactivated successfully"));
+        return ResponseEntity.ok(StandardApiResponse.success("Product deactivated successfully"));
     }
 
     @PatchMapping("/{id}/toggle-status")
@@ -105,12 +105,12 @@ public class AdminProductController {
             summary = "Toggle product status [ADMIN]",
             description = "Flips status between ACTIVE and INACTIVE."
     )
-    public ResponseEntity<ApiResponse<ProductResponse>> toggleStatus(@PathVariable UUID id) {
+    public ResponseEntity<StandardApiResponse<ProductResponse>> toggleStatus(@PathVariable UUID id) {
         ProductResponse result = productService.toggleStatus(id);
         String msg = result.getStatus().name().equals("ACTIVE")
                 ? "Product activated"
                 : "Product deactivated";
-        return ResponseEntity.ok(ApiResponse.success(msg, result));
+        return ResponseEntity.ok(StandardApiResponse.success(msg, result));
     }
 
     @PatchMapping("/{id}/stock")
@@ -120,12 +120,12 @@ public class AdminProductController {
                           "Automatically sets status to OUT_OF_STOCK when quantity reaches 0, " +
                           "and restores to ACTIVE when quantity is positive."
     )
-    public ResponseEntity<ApiResponse<Void>> updateStock(
+    public ResponseEntity<StandardApiResponse<Void>> updateStock(
             @PathVariable UUID id,
             @RequestParam @Min(value = 0, message = "Stock quantity cannot be negative") int quantity) {
 
         productService.updateStock(id, quantity);
-        return ResponseEntity.ok(ApiResponse.success("Stock updated to " + quantity + " units"));
+        return ResponseEntity.ok(StandardApiResponse.success("Stock updated to " + quantity + " units"));
     }
 
     @PostMapping("/bulk-status")
@@ -134,11 +134,11 @@ public class AdminProductController {
             description = "Updates the status of multiple products in a single operation. " +
                           "Use for mass activate/deactivate workflows."
     )
-    public ResponseEntity<ApiResponse<Void>> bulkUpdateStatus(
+    public ResponseEntity<StandardApiResponse<Void>> bulkUpdateStatus(
             @Valid @RequestBody BulkStatusRequest request) {
 
         productService.bulkUpdateStatus(request.getProductIds(), request.getStatus());
-        return ResponseEntity.ok(ApiResponse.success(
+        return ResponseEntity.ok(StandardApiResponse.success(
                 "Status updated to " + request.getStatus() + " for " +
                 request.getProductIds().size() + " product(s)"));
     }

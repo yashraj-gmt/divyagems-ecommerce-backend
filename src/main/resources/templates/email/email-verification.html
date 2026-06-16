@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Verify Your Email — Divya Gems</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:'Segoe UI',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr>
+    <td align="center" style="padding:40px 20px;">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <!-- Header -->
+        <tr>
+          <td style="background:linear-gradient(135deg,#7B2D8B,#C2185B);padding:32px 40px;text-align:center;">
+            <h1 style="margin:0;color:#fff;font-size:28px;letter-spacing:1px;">🔮 Divya Gems</h1>
+          </td>
+        </tr>
+        <!-- Body -->
+        <tr>
+          <td style="padding:40px;">
+            <h2 style="color:#333;margin-top:0;">Verify Your Email Address</h2>
+            <p style="color:#555;line-height:1.7;">Thank you for joining <strong>Divya Gems</strong>! 🙏</p>
+            <p style="color:#555;line-height:1.7;">Please click the button below to verify your email address and activate your account. This link is valid for <strong>24 hours</strong>.</p>
+            <div style="text-align:center;margin:32px 0;">
+              <a th:href="${verifyUrl}" href="#"
+                 style="display:inline-block;background:linear-gradient(135deg,#7B2D8B,#C2185B);color:#fff;
+                        padding:14px 36px;border-radius:8px;text-decoration:none;font-size:16px;font-weight:600;">
+                Verify Email Address
+              </a>
+            </div>
+            <p style="color:#888;font-size:13px;">Or paste this link in your browser:</p>
+            <p style="word-break:break-all;color:#7B2D8B;font-size:13px;" th:text="${verifyUrl}">https://example.com/verify</p>
+            <hr style="border:none;border-top:1px solid #eee;margin:32px 0;"/>
+            <p style="color:#aaa;font-size:12px;">If you did not create an account with Divya Gems, please ignore this email.</p>
+          </td>
+        </tr>
+        <!-- Footer -->
+        <tr>
+          <td style="background:#f9f9f9;padding:20px 40px;text-align:center;">
+            <p style="margin:0;color:#bbb;font-size:12px;">© 2025 Divya Gems. All rights reserved.</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

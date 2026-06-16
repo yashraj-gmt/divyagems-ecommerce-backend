@@ -4,7 +4,7 @@ import com.divyagems.ecommerce.category.dto.CategoryRequest;
 import com.divyagems.ecommerce.category.dto.CategoryResponse;
 import com.divyagems.ecommerce.category.dto.CategoryTreeResponse;
 import com.divyagems.ecommerce.category.service.CategoryService;
-import com.divyagems.ecommerce.common.ApiResponse;
+import com.divyagems.ecommerce.common.StandardApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -49,9 +49,9 @@ public class CategoryController {
             summary = "List all active categories",
             description = "Returns a flat list of all active categories ordered by displayOrder."
     )
-    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories() {
+    public ResponseEntity<StandardApiResponse<List<CategoryResponse>>> getAllCategories() {
         List<CategoryResponse> categories = categoryService.getAllCategories();
-        return ResponseEntity.ok(ApiResponse.success("Categories fetched", categories));
+        return ResponseEntity.ok(StandardApiResponse.success("Categories fetched", categories));
     }
 
     @GetMapping("/categories/tree")
@@ -60,9 +60,9 @@ public class CategoryController {
             description = "Returns top-level categories with nested subcategories. " +
                           "Ideal for navigation menus and breadcrumb generation."
     )
-    public ResponseEntity<ApiResponse<List<CategoryTreeResponse>>> getCategoryTree() {
+    public ResponseEntity<StandardApiResponse<List<CategoryTreeResponse>>> getCategoryTree() {
         List<CategoryTreeResponse> tree = categoryService.getCategoryTree();
-        return ResponseEntity.ok(ApiResponse.success("Category tree fetched", tree));
+        return ResponseEntity.ok(StandardApiResponse.success("Category tree fetched", tree));
     }
 
     @GetMapping("/categories/{slug}")
@@ -70,11 +70,11 @@ public class CategoryController {
             summary = "Get category by slug",
             description = "Fetch a single category by its URL-safe slug."
     )
-    public ResponseEntity<ApiResponse<CategoryResponse>> getCategoryBySlug(
+    public ResponseEntity<StandardApiResponse<CategoryResponse>> getCategoryBySlug(
             @PathVariable String slug) {
 
         CategoryResponse category = categoryService.getCategoryBySlug(slug);
-        return ResponseEntity.ok(ApiResponse.success("Category fetched", category));
+        return ResponseEntity.ok(StandardApiResponse.success("Category fetched", category));
     }
 
     // ──────────────────────────────────────────────────────────
@@ -90,12 +90,12 @@ public class CategoryController {
             description = "Creates a category. Slug is auto-generated from name if not provided. " +
                           "Set parentId to create a subcategory."
     )
-    public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(
+    public ResponseEntity<StandardApiResponse<CategoryResponse>> createCategory(
             @Valid @RequestBody CategoryRequest request) {
 
         CategoryResponse created = categoryService.createCategory(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Category created successfully", created));
+                .body(StandardApiResponse.success("Category created successfully", created));
     }
 
     @PutMapping("/admin/categories/{id}")
@@ -106,12 +106,12 @@ public class CategoryController {
             description = "Updates an existing category. Slug is regenerated if the name changes " +
                           "and no explicit slug is provided."
     )
-    public ResponseEntity<ApiResponse<CategoryResponse>> updateCategory(
+    public ResponseEntity<StandardApiResponse<CategoryResponse>> updateCategory(
             @PathVariable UUID id,
             @Valid @RequestBody CategoryRequest request) {
 
         CategoryResponse updated = categoryService.updateCategory(id, request);
-        return ResponseEntity.ok(ApiResponse.success("Category updated successfully", updated));
+        return ResponseEntity.ok(StandardApiResponse.success("Category updated successfully", updated));
     }
 
     @DeleteMapping("/admin/categories/{id}")
@@ -122,9 +122,9 @@ public class CategoryController {
             description = "Permanently deletes a category. Returns 400 if the category has " +
                           "associated products or subcategories."
     )
-    public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable UUID id) {
+    public ResponseEntity<StandardApiResponse<Void>> deleteCategory(@PathVariable UUID id) {
         categoryService.deleteCategory(id);
-        return ResponseEntity.ok(ApiResponse.success("Category deleted successfully"));
+        return ResponseEntity.ok(StandardApiResponse.success("Category deleted successfully"));
     }
 
     @PatchMapping("/admin/categories/{id}/toggle-status")
@@ -134,11 +134,11 @@ public class CategoryController {
             summary = "Toggle category active status [ADMIN]",
             description = "Flips the isActive flag of a category between active and inactive."
     )
-    public ResponseEntity<ApiResponse<CategoryResponse>> toggleStatus(@PathVariable UUID id) {
+    public ResponseEntity<StandardApiResponse<CategoryResponse>> toggleStatus(@PathVariable UUID id) {
         CategoryResponse updated = categoryService.toggleStatus(id);
         String msg = updated.isActive()
                 ? "Category activated successfully"
                 : "Category deactivated successfully";
-        return ResponseEntity.ok(ApiResponse.success(msg, updated));
+        return ResponseEntity.ok(StandardApiResponse.success(msg, updated));
     }
 }

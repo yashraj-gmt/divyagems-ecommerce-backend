@@ -50,7 +50,7 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
             JOIN oi.order o
             WHERE oi.product = :product
               AND o.user = :user
-              AND o.status = com.divyagems.ecommerce.enums.OrderStatusEnum.DELIVERED
+              AND o.orderStatus = com.divyagems.ecommerce.enums.OrderStatusEnum.DELIVERED
             """)
     boolean isVerifiedPurchaser(@Param("product") Product product, @Param("user") User user);
 }

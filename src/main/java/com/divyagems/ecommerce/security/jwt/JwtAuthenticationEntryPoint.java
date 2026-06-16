@@ -30,10 +30,7 @@ import java.util.Map;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
-
-    private final ObjectMapper objectMapper;
 
     @Override
     public void commence(HttpServletRequest request,
@@ -45,14 +42,21 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("error", "Unauthorized");
-        body.put("message", authException.getMessage() != null
+        String message = authException.getMessage() != null
                 ? authException.getMessage()
-                : "Full authentication is required to access this resource");
-        body.put("path", request.getRequestURI());
-        body.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                : "Full authentication is required to access this resource";
+        
+        // Escape quotes to be safe
+        message = message.replace("\"", "\\\"");
 
-        objectMapper.writeValue(response.getOutputStream(), body);
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        String path = request.getRequestURI();
+
+        String jsonResponse = String.format(
+                "{\"error\":\"Unauthorized\",\"message\":\"%s\",\"path\":\"%s\",\"timestamp\":\"%s\"}",
+                message, path, timestamp
+        );
+
+        response.getWriter().write(jsonResponse);
     }
 }

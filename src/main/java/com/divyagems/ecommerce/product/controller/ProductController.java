@@ -1,6 +1,6 @@
 package com.divyagems.ecommerce.product.controller;
 
-import com.divyagems.ecommerce.common.ApiResponse;
+import com.divyagems.ecommerce.common.StandardApiResponse;
 import com.divyagems.ecommerce.product.dto.request.ProductFilterRequest;
 import com.divyagems.ecommerce.product.dto.response.ProductPageResponse;
 import com.divyagems.ecommerce.product.dto.response.ProductResponse;
@@ -43,11 +43,11 @@ public class ProductController {
                           "colors, spiritual properties (materials, planets, chakras, elements), and sorting. " +
                           "Only ACTIVE products are returned. Use @ModelAttribute binding for multi-value params."
     )
-    public ResponseEntity<ApiResponse<ProductPageResponse>> getProducts(
+    public ResponseEntity<StandardApiResponse<ProductPageResponse>> getProducts(
             @ModelAttribute ProductFilterRequest filter) {
 
         ProductPageResponse result = productService.getProducts(filter, false);
-        return ResponseEntity.ok(ApiResponse.success("Products fetched", result));
+        return ResponseEntity.ok(StandardApiResponse.success("Products fetched", result));
     }
 
     @GetMapping("/featured")
@@ -55,9 +55,9 @@ public class ProductController {
             summary = "Get featured products",
             description = "Returns all active products marked as featured, sorted by rating descending."
     )
-    public ResponseEntity<ApiResponse<List<ProductSummaryResponse>>> getFeaturedProducts() {
+    public ResponseEntity<StandardApiResponse<List<ProductSummaryResponse>>> getFeaturedProducts() {
         List<ProductSummaryResponse> result = productService.getFeaturedProducts();
-        return ResponseEntity.ok(ApiResponse.success("Featured products fetched", result));
+        return ResponseEntity.ok(StandardApiResponse.success("Featured products fetched", result));
     }
 
     @GetMapping("/new-arrivals")
@@ -65,9 +65,9 @@ public class ProductController {
             summary = "Get new arrivals",
             description = "Returns the latest 12 active products marked as new arrivals, sorted by creation date."
     )
-    public ResponseEntity<ApiResponse<List<ProductSummaryResponse>>> getNewArrivals() {
+    public ResponseEntity<StandardApiResponse<List<ProductSummaryResponse>>> getNewArrivals() {
         List<ProductSummaryResponse> result = productService.getNewArrivals();
-        return ResponseEntity.ok(ApiResponse.success("New arrivals fetched", result));
+        return ResponseEntity.ok(StandardApiResponse.success("New arrivals fetched", result));
     }
 
     @GetMapping("/{slug}")
@@ -76,11 +76,11 @@ public class ProductController {
             description = "Returns full product details including variants, images, tags grouped by type, " +
                           "and SEO metadata. Slug is the URL-safe identifier (e.g. 'ruby-gemstone-pendant')."
     )
-    public ResponseEntity<ApiResponse<ProductResponse>> getProductBySlug(
+    public ResponseEntity<StandardApiResponse<ProductResponse>> getProductBySlug(
             @PathVariable String slug) {
 
         ProductResponse result = productService.getProductBySlug(slug);
-        return ResponseEntity.ok(ApiResponse.success("Product fetched", result));
+        return ResponseEntity.ok(StandardApiResponse.success("Product fetched", result));
     }
 
     @GetMapping("/{id}/related")
@@ -89,10 +89,10 @@ public class ProductController {
             description = "Returns up to 8 active products from the same category, " +
                           "sorted by rating. Excludes the current product."
     )
-    public ResponseEntity<ApiResponse<List<ProductSummaryResponse>>> getRelatedProducts(
+    public ResponseEntity<StandardApiResponse<List<ProductSummaryResponse>>> getRelatedProducts(
             @PathVariable UUID id) {
 
         List<ProductSummaryResponse> result = productService.getRelatedProducts(id);
-        return ResponseEntity.ok(ApiResponse.success("Related products fetched", result));
+        return ResponseEntity.ok(StandardApiResponse.success("Related products fetched", result));
     }
 }

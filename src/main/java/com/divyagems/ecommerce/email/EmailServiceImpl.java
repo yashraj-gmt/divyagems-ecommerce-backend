@@ -1,5 +1,6 @@
 package com.divyagems.ecommerce.email;
 
+import com.divyagems.ecommerce.enums.OrderStatusEnum;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -9,21 +10,19 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
-/**
- * Async email service implementation using Spring's JavaMailSender.
- * All methods run in a separate thread pool managed by Spring's @Async executor
- * (configured in AsyncConfig). Failures are logged but not propagated to avoid
- * disrupting the caller's transaction.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
+    private final TemplateEngine templateEngine;
 
     @Value("${spring.mail.username}")
     private String fromEmail;
@@ -34,46 +33,67 @@ public class EmailServiceImpl implements EmailService {
     @Value("${spring.application.name:Divya Gems}")
     private String appName;
 
-    @Async
+    // ─── Public API ─────────────────────────────────────────────
+
+    @Async("emailTaskExecutor")
     @Override
     public void sendVerificationEmail(String to, String token) {
         String verifyUrl = frontendUrl + "/auth/verify-email?token=" + token;
-        String subject = appName + " - Verify Your Email Address";
-        String body = buildVerificationEmailBody(to, verifyUrl);
-        sendHtmlEmail(to, subject, body);
+        Context ctx = context(Map.of("verifyUrl", verifyUrl, "frontendUrl", frontendUrl));
+        String html = templateEngine.process("email/email-verification", ctx);
+        sendHtmlEmail(to, appName + " — Verify Your Email Address", html);
     }
 
-    @Async
+    @Async("emailTaskExecutor")
     @Override
     public void sendPasswordResetEmail(String to, String token) {
         String resetUrl = frontendUrl + "/auth/reset-password?token=" + token;
-        String subject = appName + " - Reset Your Password";
-        String body = buildPasswordResetEmailBody(to, resetUrl);
-        sendHtmlEmail(to, subject, body);
+        Context ctx = context(Map.of("resetUrl", resetUrl, "frontendUrl", frontendUrl));
+        String html = templateEngine.process("email/password-reset", ctx);
+        sendHtmlEmail(to, appName + " — Reset Your Password", html);
     }
 
-    @Async
+    @Async("emailTaskExecutor")
     @Override
     public void sendOrderConfirmationEmail(String to, String orderId, BigDecimal totalAmount) {
-        String subject = appName + " - Order Confirmed! " + orderId;
-        String body = buildOrderConfirmationBody(orderId, totalAmount);
-        sendHtmlEmail(to, subject, body);
+        Context ctx = context(Map.of(
+                "orderId", orderId,
+                "totalAmount", totalAmount.toPlainString(),
+                "paymentMethod", "Online / COD",
+                "frontendUrl", frontendUrl
+        ));
+        String html = templateEngine.process("email/order-confirmation", ctx);
+        sendHtmlEmail(to, appName + " — Order Confirmed! " + orderId, html);
     }
 
-    @Async
+    @Async("emailTaskExecutor")
     @Override
     public void sendPaymentConfirmationEmail(String to, String orderId) {
-        String subject = appName + " - Payment Received for " + orderId;
-        String body = buildPaymentConfirmationBody(orderId);
-        sendHtmlEmail(to, subject, body);
+        Context ctx = context(Map.of(
+                "orderId", orderId,
+                "amount", "—",
+                "razorpayPaymentId", "—",
+                "frontendUrl", frontendUrl
+        ));
+        String html = templateEngine.process("email/payment-confirmation", ctx);
+        sendHtmlEmail(to, appName + " — Payment Received for " + orderId, html);
     }
 
-    @Async
+    @Async("emailTaskExecutor")
     @Override
     public void sendOrderStatusUpdateEmail(String to, String orderId, String status) {
-        String subject = appName + " - Order Update: " + orderId;
-        String body = buildStatusUpdateBody(orderId, status);
-        sendHtmlEmail(to, subject, body);
+        String emoji = statusEmoji(status);
+        String label = status.replace("_", " ");
+        String msg   = statusMessage(status);
+        Context ctx = context(Map.of(
+                "orderId", orderId,
+                "statusEmoji", emoji,
+                "statusLabel", label,
+                "statusMessage", msg,
+                "frontendUrl", frontendUrl
+        ));
+        String html = templateEngine.process("email/order-status-update", ctx);
+        sendHtmlEmail(to, appName + " — Order Update: " + orderId, html);
     }
 
     // ─── Private Helpers ───────────────────────────────────────
@@ -87,96 +107,22 @@ public class EmailServiceImpl implements EmailService {
             helper.setSubject(subject);
             helper.setText(htmlBody, true);
             mailSender.send(message);
-            log.info("Email sent to {} with subject: {}", to, subject);
+            log.info("Email sent → {} | subject: {}", to, subject);
         } catch (MessagingException e) {
-            log.error("Failed to send email to {} | subject: {} | error: {}", to, subject, e.getMessage());
+            log.error("Failed to send email → {} | subject: {} | error: {}", to, subject, e.getMessage());
+        } catch (Exception e) {
+            log.error("Unexpected error sending email → {} | error: {}", to, e.getMessage(), e);
         }
     }
 
-    private String buildVerificationEmailBody(String to, String verifyUrl) {
-        return """
-                <!DOCTYPE html>
-                <html>
-                <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
-                  <div style="max-width: 600px; margin: auto; background: white; border-radius: 8px; padding: 40px;">
-                    <h2 style="color: #7B2D8B;">Welcome to %s 🙏</h2>
-                    <p>Thank you for registering! Please verify your email address by clicking the button below.</p>
-                    <p>This link expires in <strong>24 hours</strong>.</p>
-                    <a href="%s"
-                       style="display:inline-block; background:#7B2D8B; color:white; padding:12px 24px;
-                              border-radius:6px; text-decoration:none; font-size:16px;">
-                      Verify Email Address
-                    </a>
-                    <p style="color: #888; margin-top: 30px;">If you did not create an account, please ignore this email.</p>
-                  </div>
-                </body>
-                </html>
-                """.formatted(appName, verifyUrl);
+    private Context context(Map<String, Object> variables) {
+        Context ctx = new Context();
+        ctx.setVariables(variables);
+        return ctx;
     }
 
-    private String buildPasswordResetEmailBody(String to, String resetUrl) {
-        return """
-                <!DOCTYPE html>
-                <html>
-                <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
-                  <div style="max-width: 600px; margin: auto; background: white; border-radius: 8px; padding: 40px;">
-                    <h2 style="color: #7B2D8B;">Reset Your Password</h2>
-                    <p>We received a request to reset your password for your %s account.</p>
-                    <p>Click the button below. This link expires in <strong>15 minutes</strong>.</p>
-                    <a href="%s"
-                       style="display:inline-block; background:#7B2D8B; color:white; padding:12px 24px;
-                              border-radius:6px; text-decoration:none; font-size:16px;">
-                      Reset Password
-                    </a>
-                    <p style="color: #888; margin-top: 30px;">If you did not request a password reset, please ignore this email. Your account is safe.</p>
-                  </div>
-                </body>
-                </html>
-                """.formatted(appName, resetUrl);
-    }
-
-    private String buildOrderConfirmationBody(String orderId, BigDecimal totalAmount) {
-        return """
-                <!DOCTYPE html>
-                <html>
-                <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
-                  <div style="max-width: 600px; margin: auto; background: white; border-radius: 8px; padding: 40px;">
-                    <h2 style="color: #7B2D8B;">🎉 Order Confirmed!</h2>
-                    <p>Thank you for your order from <strong>%s</strong>. We've received your order and it's being processed.</p>
-                    <div style="background: #f9f0ff; border-radius: 6px; padding: 16px; margin: 20px 0;">
-                      <p style="margin: 0;"><strong>Order ID:</strong> %s</p>
-                      <p style="margin: 8px 0 0;"><strong>Total Amount:</strong> ₹%s</p>
-                    </div>
-                    <p>We'll notify you when your order is shipped.</p>
-                    <p style="color: #888; margin-top: 30px;">Thank you for choosing %s 🙏</p>
-                  </div>
-                </body>
-                </html>
-                """.formatted(appName, orderId, totalAmount.toPlainString(), appName);
-    }
-
-    private String buildPaymentConfirmationBody(String orderId) {
-        return """
-                <!DOCTYPE html>
-                <html>
-                <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
-                  <div style="max-width: 600px; margin: auto; background: white; border-radius: 8px; padding: 40px;">
-                    <h2 style="color: #7B2D8B;">✅ Payment Successful!</h2>
-                    <p>Your payment for order <strong>%s</strong> has been successfully received.</p>
-                    <div style="background: #f9f0ff; border-radius: 6px; padding: 16px; margin: 20px 0;">
-                      <p style="margin: 0;"><strong>Order ID:</strong> %s</p>
-                      <p style="margin: 8px 0 0;"><strong>Status:</strong> Confirmed ✓</p>
-                    </div>
-                    <p>Your order is now being prepared. You'll receive a shipping notification soon.</p>
-                    <p style="color: #888; margin-top: 30px;">Thank you for trusting %s 🙏</p>
-                  </div>
-                </body>
-                </html>
-                """.formatted(orderId, orderId, appName);
-    }
-
-    private String buildStatusUpdateBody(String orderId, String status) {
-        String statusEmoji = switch (status) {
+    private String statusEmoji(String status) {
+        return switch (status) {
             case "SHIPPED"          -> "🚚";
             case "OUT_FOR_DELIVERY" -> "🏃";
             case "DELIVERED"        -> "📦";
@@ -185,22 +131,18 @@ public class EmailServiceImpl implements EmailService {
             case "REFUNDED"         -> "✅";
             default                 -> "🔔";
         };
-        return """
-                <!DOCTYPE html>
-                <html>
-                <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
-                  <div style="max-width: 600px; margin: auto; background: white; border-radius: 8px; padding: 40px;">
-                    <h2 style="color: #7B2D8B;">%s Order Update</h2>
-                    <p>Your order <strong>%s</strong> has been updated.</p>
-                    <div style="background: #f9f0ff; border-radius: 6px; padding: 16px; margin: 20px 0;">
-                      <p style="margin: 0;"><strong>Order ID:</strong> %s</p>
-                      <p style="margin: 8px 0 0;"><strong>New Status:</strong> %s</p>
-                    </div>
-                    <p>Log in to track your order for more details.</p>
-                    <p style="color: #888; margin-top: 30px;">Thank you for choosing %s 🙏</p>
-                  </div>
-                </body>
-                </html>
-                """.formatted(statusEmoji, orderId, orderId, status.replace("_", " "), appName);
+    }
+
+    private String statusMessage(String status) {
+        return switch (status) {
+            case "PROCESSING"       -> "Your order is being prepared for dispatch.";
+            case "SHIPPED"          -> "Your order is on its way! Track it using the tracking number above.";
+            case "OUT_FOR_DELIVERY" -> "Your order is out for delivery today. Please keep your phone handy.";
+            case "DELIVERED"        -> "Your order has been delivered. We hope you love your gems! 🌟";
+            case "CANCELLED"        -> "Your order has been cancelled. If you paid online, a refund will be initiated.";
+            case "REFUND_INITIATED" -> "A refund for your order has been initiated. It may take 5–7 business days.";
+            case "REFUNDED"         -> "Your refund has been processed successfully.";
+            default                 -> "Your order status has been updated.";
+        };
     }
 }

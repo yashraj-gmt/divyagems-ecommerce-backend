@@ -5,7 +5,7 @@ import com.divyagems.ecommerce.cart.dto.request.UpdateCartItemRequest;
 import com.divyagems.ecommerce.cart.dto.response.CartResponse;
 import com.divyagems.ecommerce.cart.dto.response.CartValidationResponse;
 import com.divyagems.ecommerce.cart.service.CartService;
-import com.divyagems.ecommerce.common.ApiResponse;
+import com.divyagems.ecommerce.common.StandardApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -74,13 +74,13 @@ public class CartController {
                           "A new cart is created if none exists. " +
                           "Guest carts are identified by the CART_SESSION_ID cookie."
     )
-    public ResponseEntity<ApiResponse<CartResponse>> getMyCart(
+    public ResponseEntity<StandardApiResponse<CartResponse>> getMyCart(
             HttpServletRequest request,
             HttpServletResponse response) {
 
         String sessionId = resolveSessionId(request, response);
         CartResponse cart = cartService.getOrCreateCart(sessionId);
-        return ResponseEntity.ok(ApiResponse.success("Cart fetched", cart));
+        return ResponseEntity.ok(StandardApiResponse.success("Cart fetched", cart));
     }
 
     // ──────────────────────────────────────────────────────────
@@ -94,14 +94,14 @@ public class CartController {
                           "If the same product+variant already exists, the quantity is incremented. " +
                           "Price is captured at the time of adding."
     )
-    public ResponseEntity<ApiResponse<CartResponse>> addToCart(
+    public ResponseEntity<StandardApiResponse<CartResponse>> addToCart(
             @Valid @RequestBody AddToCartRequest addRequest,
             HttpServletRequest request,
             HttpServletResponse response) {
 
         String sessionId = resolveSessionId(request, response);
         CartResponse cart = cartService.addToCart(addRequest, sessionId);
-        return ResponseEntity.ok(ApiResponse.success("Item added to cart", cart));
+        return ResponseEntity.ok(StandardApiResponse.success("Item added to cart", cart));
     }
 
     // ──────────────────────────────────────────────────────────
@@ -114,7 +114,7 @@ public class CartController {
             description = "Sets the quantity for an existing cart item. " +
                           "quantity=0 removes the item (same as DELETE /cart/items/{id})."
     )
-    public ResponseEntity<ApiResponse<CartResponse>> updateCartItem(
+    public ResponseEntity<StandardApiResponse<CartResponse>> updateCartItem(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateCartItemRequest updateRequest,
             HttpServletRequest request,
@@ -122,7 +122,7 @@ public class CartController {
 
         String sessionId = resolveSessionId(request, response);
         CartResponse cart = cartService.updateCartItem(id, updateRequest, sessionId);
-        return ResponseEntity.ok(ApiResponse.success("Cart item updated", cart));
+        return ResponseEntity.ok(StandardApiResponse.success("Cart item updated", cart));
     }
 
     // ──────────────────────────────────────────────────────────
@@ -134,14 +134,14 @@ public class CartController {
             summary = "Remove item from cart",
             description = "Removes a single line item from the cart by its cart item ID."
     )
-    public ResponseEntity<ApiResponse<CartResponse>> removeCartItem(
+    public ResponseEntity<StandardApiResponse<CartResponse>> removeCartItem(
             @PathVariable UUID id,
             HttpServletRequest request,
             HttpServletResponse response) {
 
         String sessionId = resolveSessionId(request, response);
         CartResponse cart = cartService.removeCartItem(id, sessionId);
-        return ResponseEntity.ok(ApiResponse.success("Item removed from cart", cart));
+        return ResponseEntity.ok(StandardApiResponse.success("Item removed from cart", cart));
     }
 
     // ──────────────────────────────────────────────────────────
@@ -153,13 +153,13 @@ public class CartController {
             summary = "Clear cart",
             description = "Removes all items from the cart. The cart entity itself is preserved."
     )
-    public ResponseEntity<ApiResponse<Void>> clearCart(
+    public ResponseEntity<StandardApiResponse<Void>> clearCart(
             HttpServletRequest request,
             HttpServletResponse response) {
 
         String sessionId = resolveSessionId(request, response);
         cartService.clearCart(sessionId);
-        return ResponseEntity.ok(ApiResponse.success("Cart cleared successfully"));
+        return ResponseEntity.ok(StandardApiResponse.success("Cart cleared successfully"));
     }
 
     // ──────────────────────────────────────────────────────────
@@ -173,7 +173,7 @@ public class CartController {
                           "and price changes. Returns a validation result with any issues found. " +
                           "Call this before creating an order."
     )
-    public ResponseEntity<ApiResponse<CartValidationResponse>> validateCart(
+    public ResponseEntity<StandardApiResponse<CartValidationResponse>> validateCart(
             HttpServletRequest request,
             HttpServletResponse response) {
 
@@ -184,7 +184,7 @@ public class CartController {
                 ? "Cart is valid and ready for checkout"
                 : "Cart has issues that must be resolved before checkout";
 
-        return ResponseEntity.ok(ApiResponse.success(msg, validation));
+        return ResponseEntity.ok(StandardApiResponse.success(msg, validation));
     }
 
     // ──────────────────────────────────────────────────────────
@@ -201,7 +201,7 @@ public class CartController {
                           "Guest cart is deactivated after merge. " +
                           "For duplicate items, the higher quantity is kept (capped by stock)."
     )
-    public ResponseEntity<ApiResponse<Void>> mergeGuestCart(
+    public ResponseEntity<StandardApiResponse<Void>> mergeGuestCart(
             @Parameter(description = "The guest session ID to merge from")
             @RequestParam(required = false) String sessionId,
             HttpServletRequest request) {
@@ -209,7 +209,7 @@ public class CartController {
         // If sessionId not provided as param, try to read from cookie
         String resolvedSessionId = sessionId != null ? sessionId : readSessionCookie(request);
         cartService.mergeGuestCart(resolvedSessionId);
-        return ResponseEntity.ok(ApiResponse.success("Guest cart merged successfully"));
+        return ResponseEntity.ok(StandardApiResponse.success("Guest cart merged successfully"));
     }
 
     // ─── Private: Session Cookie Management ───────────────────

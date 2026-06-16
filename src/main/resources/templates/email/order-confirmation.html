@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Order Confirmed — Divya Gems</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:'Segoe UI',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr>
+    <td align="center" style="padding:40px 20px;">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <tr>
+          <td style="background:linear-gradient(135deg,#7B2D8B,#C2185B);padding:32px 40px;text-align:center;">
+            <h1 style="margin:0;color:#fff;font-size:28px;letter-spacing:1px;">🔮 Divya Gems</h1>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:40px;">
+            <h2 style="color:#333;margin-top:0;">🎉 Order Confirmed!</h2>
+            <p style="color:#555;line-height:1.7;">Thank you for your order! We've received it and it's being processed with love and care.</p>
+
+            <!-- Order Summary Box -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f0ff;border-radius:8px;margin:24px 0;">
+              <tr>
+                <td style="padding:20px;">
+                  <p style="margin:0 0 8px;color:#333;"><strong>Order ID:</strong> <span th:text="${orderId}" style="color:#7B2D8B;">DG-202601-00001</span></p>
+                  <p style="margin:0 0 8px;color:#333;"><strong>Total Amount:</strong> ₹<span th:text="${totalAmount}">0.00</span></p>
+                  <p style="margin:0;color:#333;"><strong>Payment Method:</strong> <span th:text="${paymentMethod}">Online</span></p>
+                </td>
+              </tr>
+            </table>
+
+            <p style="color:#555;line-height:1.7;">We'll send you another email when your order ships. You can track your order anytime by logging in to your account.</p>
+            <div style="text-align:center;margin:32px 0;">
+              <a th:href="${frontendUrl + '/orders/' + orderId}" href="#"
+                 style="display:inline-block;background:linear-gradient(135deg,#7B2D8B,#C2185B);color:#fff;
+                        padding:14px 36px;border-radius:8px;text-decoration:none;font-size:16px;font-weight:600;">
+                View Order
+              </a>
+            </div>
+            <hr style="border:none;border-top:1px solid #eee;margin:32px 0;"/>
+            <p style="color:#aaa;font-size:12px;text-align:center;">Thank you for trusting Divya Gems. We pray these sacred gems bring you light and prosperity. 🙏</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#f9f9f9;padding:20px 40px;text-align:center;">
+            <p style="margin:0;color:#bbb;font-size:12px;">© 2025 Divya Gems. All rights reserved.</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

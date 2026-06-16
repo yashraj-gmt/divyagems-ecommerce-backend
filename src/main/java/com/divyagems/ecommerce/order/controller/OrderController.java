@@ -24,7 +24,7 @@ import java.util.Map;
 
 /**
  * Customer-facing order endpoints.
- * All endpoints (except track) require a valid JWT.
+ * All endpoints (except track) require a valid JWT. 
  */
 @RestController
 @RequestMapping("/orders")
@@ -72,7 +72,7 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrderById(orderId));
     }
 
-    // ─── GET /orders/{orderId}/track ─────────────────────────
+    // ─── GET /orders/{orderId}/track
     @Operation(
             summary = "Public order tracking — no authentication required",
             description = "Returns order status timeline. Requires the shipping phone number for verification."

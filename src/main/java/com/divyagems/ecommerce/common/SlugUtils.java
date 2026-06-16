@@ -8,19 +8,20 @@ import java.util.regex.Pattern;
  * Utility class for generating URL-safe slugs from arbitrary strings.
  *
  * Examples:
- *   "Ruby Gemstones"  → "ruby-gemstones"
- *   "Śiva & Vishnu!"  → "siva-vishnu"
- *   "  Chakra  Healing  " → "chakra-healing"
+ * "Ruby Gemstones" → "ruby-gemstones"
+ * "Śiva & Vishnu!" → "siva-vishnu"
+ * " Chakra Healing " → "chakra-healing"
  */
 public final class SlugUtils {
 
-    private static final Pattern NON_ASCII     = Pattern.compile("[^\\p{ASCII}]");
-    private static final Pattern NON_ALPHANUM  = Pattern.compile("[^a-z0-9\\s-]");
-    private static final Pattern WHITESPACE    = Pattern.compile("[\\s]+");
-    private static final Pattern MULTI_HYPHEN  = Pattern.compile("-{2,}");
+    private static final Pattern NON_ASCII = Pattern.compile("[^\\p{ASCII}]");
+    private static final Pattern NON_ALPHANUM = Pattern.compile("[^a-z0-9\\s-]");
+    private static final Pattern WHITESPACE = Pattern.compile("[\\s]+");
+    private static final Pattern MULTI_HYPHEN = Pattern.compile("-{2,}");
     private static final Pattern LEADING_TRAILING_HYPHEN = Pattern.compile("^-|-$");
 
-    private SlugUtils() {}
+    private SlugUtils() {
+    }
 
     /**
      * Convert a display name to a lowercase, hyphenated, URL-safe slug.
